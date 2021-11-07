@@ -1,0 +1,105 @@
+
+###
+apt-get update  -y
+apt-get install -y python-software-properties git
+apt-get install -y build-essential cmake g++
+apt-get install -y libboost-all-dev libssl-dev
+apt-get install -y cmake-curses-gui
+apt-get install -y gcc
+
+apt-get update   -y
+apt-get install  -y build-essential git libtiff-dev libgeotiff-dev libboost-all-dev libssl-dev cmake-curses-gui cmake wget gcc g++ 
+apt-get install  -y libc6-dev-i386
+
+apt-get install -y \
+        build-essential git libtiff-dev libgeotiff-dev libboost-all-dev libssl-dev cmake-curses-gui cmake wget gcc g++ \
+        cmake \
+        git \
+        libtiff-dev \
+        libgeotiff-dev \
+        libboost-system-dev \
+        libboost-thread-dev \
+        libboost-filesystem-dev \
+        libboost-program-options-dev \
+        libboost-regex-dev \
+        libboost-iostreams-dev \
+        wget
+
+cd /opt \
+    && git clone https://github.com/m-schuetz/LAStools.git \
+    && cd LAStools/LASzip && mkdir build && cd build \
+    && cmake -DCMAKE_BUILD_TYPE=Release .. \
+    && make \
+    && make install \
+    && ldconfig
+
+cd /opt \
+    && wget https://github.com/potree/PotreeConverter/archive/refs/tags/1.6.tar.gz \
+    && tar zxf 1.6.tar.gz \
+    && cd PotreeConverter-1.6 \
+    && mkdir build \
+    && cd build \
+    && cmake -DCMAKE_BUILD_TYPE=Release -DLASZIP_INCLUDE_DIRS=/opt/LAStools/LASzip/dll/ -DLASZIP_LIBRARY=/usr/local/lib/liblaszip.so .. \
+    && make \
+    && make install
+
+cd /opt \
+    && wget https://github.com/potree/PotreeConverter/archive/refs/tags/1.7.tar.gz \
+    && tar zxf 1.7.tar.gz \
+    && cd PotreeConverter-1.7 \
+    && mkdir build \
+    && cd build \
+    && cmake -DCMAKE_BUILD_TYPE=Release -DLASZIP_INCLUDE_DIRS=/opt/LAStools/LASzip/dll/ -DLASZIP_LIBRARY=/usr/local/lib/liblaszip.so .. \
+    && make \
+    && make install
+
+cmake -DCMAKE_BUILD_TYPE=Release -DLASZIP_INCLUDE_DIRS=/opt/LAStools/LASzip/dll/ -DLASZIP_LIBRARY=/usr/local/lib/liblaszip.so  -DCMAKE_CXX_COMPILER=/usr/local/bin/g++ -DCMAKE_C_COMPILER=/usr/local/bin/gcc ..
+
+
+### gcc11
+cd /usr/local/src/
+wget http://ftp.tsukuba.wide.ad.jp/software/gcc/releases/gcc-11.2.0/gcc-11.2.0.tar.gz
+tar zxf gcc-11.2.0.tar.gz
+cd gcc-11.2.0
+./contrib/download_prerequisites
+mkdir build
+cd build
+../configure --enable-languages=c,c++ --disable-bootstrap --disable-multilib
+make
+make install
+
+### cmake
+cd /usr/local/src/
+wget https://github.com/Kitware/CMake/releases/download/v3.21.4/cmake-3.21.4.tar.gz
+tar zxf cmake-3.21.4.tar.gz
+cd cmake-3.21.4/
+./bootstrap
+make -j4
+make install
+
+git clone https://github.com/wjakob/tbb.git
+cd tbb/build
+cmake ..
+make
+make install
+
+### LAS
+cd /usr/local/src/
+git clone https://github.com/m-schuetz/LAStools.git
+cd LAStools/LASzip
+mkdir build && cd build
+cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=/usr/local/src/gcc-11.2.0/build/bin/g++ -DCMAKE_CC_COMPILER=/usr/local/src/gcc-11.2.0/build/bin/gcc ..
+make
+
+### 
+cd /usr/local/src/
+wget https://github.com/potree/PotreeConverter/archive/refs/tags/1.7.tar.gz
+tar zxf 1.7.tar.gz
+cd PotreeConverter-1.7
+mkdir build && cd build
+cmake -DCMAKE_BUILD_TYPE=Release -DLASZIP_INCLUDE_DIRS=/usr/local/src/LAStools/LASzip/dll -DLASZIP_LIBRARY=/usr/local/src/LAStools/LASzip/build/src/liblaszip.so ..
+cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=/usr/local/src/gcc-11.2.0/build/bin/g++ -DCMAKE_CC_COMPILER=/usr/local/src/gcc-11.2.0/build/bin/gcc -DLASZIP_INCLUDE_DIRS=/usr/local/src/lastools/master/LASzip/dll -DLASZIP_LIBRARY=/usr/local/src/lastools/master/LASzip/build/src/liblaszip.so ..
+make
+make install
+ln -s ~/LAStools/LASzip/build/src/liblaszip.so /usr/lib
+PotreeConverter -h

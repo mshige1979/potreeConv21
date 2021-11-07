@@ -1,0 +1,60 @@
+#####################
+### apt-get
+#####################
+apt-get update   -y
+apt-get install  -y build-essential git libtiff-dev libgeotiff-dev libboost-all-dev libssl-dev cmake-curses-gui cmake wget gcc g++ 
+apt-get install  -y libc6-dev-i386
+
+----
+root@df6144aed159:/usr/local/src/LAStools/LASzip/build# gcc --version
+gcc (Ubuntu 9.3.0-17ubuntu1~20.04) 9.3.0
+Copyright (C) 2019 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+root@df6144aed159:/usr/local/src/LAStools/LASzip/build# g++ --version
+g++ (Ubuntu 9.3.0-17ubuntu1~20.04) 9.3.0
+Copyright (C) 2019 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+root@df6144aed159:/usr/local/src/LAStools/LASzip/build# cmake --version
+cmake version 3.16.3
+
+CMake suite maintained and supported by Kitware (kitware.com/cmake).
+root@df6144aed159:/usr/local/src/LAStools/LASzip/build
+----
+
+### cmake
+cd /usr/local/src/
+wget https://github.com/Kitware/CMake/releases/download/v2.8.12.2/cmake-2.8.12.2.tar.gz
+tar zxf cmake-2.8.12.2.tar.gz
+cd cmake-2.8.12.2
+./bootstrap
+make -j4
+make install
+
+
+#####################
+### LAStools
+#####################
+cd /usr/local/src/
+git clone https://github.com/m-schuetz/LAStools.git
+cd LAStools/LASzip
+mkdir build && cd build
+cmake -DCMAKE_BUILD_TYPE=Release ..
+make
+make install
+ldconfig
+
+#####################
+### PotreeConverter
+#####################
+cd /usr/local/src/
+wget https://github.com/potree/PotreeConverter/archive/refs/tags/1.7.tar.gz
+tar zxf 1.7.tar.gz
+cd PotreeConverter-1.7
+mkdir build && cd build
+cmake -DCMAKE_BUILD_TYPE=Release -DLASZIP_INCLUDE_DIRS=/usr/local/src/LAStools/LASzip/dll/ -DLASZIP_LIBRARY=/usr/local/lib/liblaszip.so ..
+make
+make install

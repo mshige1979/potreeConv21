@@ -1,0 +1,55 @@
+
+###
+yum update -y
+amazon-linux-extras install -y epel
+yum install -y libmpc-devel mpfr-devel gmp-devel gcc gcc-c++ git boost-devel openssl-devel tbb-devel
+
+### gcc
+cd /usr/local/src/
+wget http://ftp.tsukuba.wide.ad.jp/software/gcc/releases/gcc-11.2.0/gcc-11.2.0.tar.gz
+tar zxf gcc-11.2.0.tar.gz
+cd gcc-11.2.0
+./contrib/download_prerequisites
+mkdir build
+cd build
+../configure --enable-languages=c,c++ --prefix=/usr/local/src/gcc-11.2.0/build --disable-bootstrap --disable-multilib
+../configure --enable-languages=c,c++ --disable-bootstrap --disable-multilib
+make
+make install
+
+### cmake
+cd /usr/local/src/
+wget https://github.com/Kitware/CMake/releases/download/v3.16.0/cmake-3.16.0.tar.gz
+wget https://github.com/Kitware/CMake/releases/download/v3.21.4/cmake-3.21.4.tar.gz
+tar zxf cmake-3.16.0.tar.gz
+tar zxf cmake-3.21.4.tar.gz
+cd cmake-3.16.0/
+cd cmake-3.21.4/
+./bootstrap
+make -j4
+make install
+
+###
+cd /usr/local/src/
+git clone https://github.com/m-schuetz/LAStools.git
+cd LAStools/LASzip
+mkdir build && cd build
+cmake -DCMAKE_BUILD_TYPE=Release ..
+cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=/usr/local/src/gcc-11.2.0/build/bin/g++ -DCMAKE_CC_COMPILER=/usr/local/src/gcc-11.2.0/build/bin/gcc ..
+make
+
+### 
+cd /usr/local/src/
+wget https://github.com/potree/PotreeConverter/archive/refs/tags/2.1.tar.gz
+wget https://github.com/potree/PotreeConverter/archive/refs/tags/2.0.tar.gz
+tar zxf 2.1.tar.gz
+tar zxf 2.0.tar.gz
+cd PotreeConverter-2.1
+cd PotreeConverter-2.0
+mkdir build && cd build
+cmake -DCMAKE_BUILD_TYPE=Release -DLASZIP_INCLUDE_DIRS=/usr/local/src/LAStools/LASzip/dll -DLASZIP_LIBRARY=/usr/local/src/LAStools/LASzip/build/src/liblaszip.so ..
+cmake -DCMAKE_BUILD_TYPE=Release -DTBB_DIR=/tmp/tbb2018_20180618oss/cmake -DCMAKE_CXX_COMPILER=/usr/local/src/gcc-11.2.0/build/bin/g++ -DCMAKE_CC_COMPILER=/usr/local/src/gcc-11.2.0/build/bin/gcc -DLASZIP_INCLUDE_DIRS=/usr/local/src/lastools/master/LASzip/dll -DLASZIP_LIBRARY=/usr/local/src/lastools/master/LASzip/build/src/liblaszip.so ..
+make
+make install
+ln -s ~/LAStools/LASzip/build/src/liblaszip.so /usr/lib
+PotreeConverter -h
